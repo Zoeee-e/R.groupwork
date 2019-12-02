@@ -1,0 +1,263 @@
+---
+
+title: "homework"
+author: "jwj"
+date: "2019/11/11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r bar}
+install.packages("dplyr")
+install.packages("ggplot2")
+
+library(data.table)
+library(dplyr)
+library(ggplot2)
+
+data2<-read.csv("C://Users//Asus//Desktop//Type.csv")#导入数据#
+data2=as.data.table(data2)
+x=nrow(data2[TT=="advancing"])
+y=nrow(data2[TT=="no change"])
+z=nrow(data2[TT=="declning"])
+count=c(x,y,z) #分别计算上涨、下跌、不变的股票有多少#
+percent=c(round(x/(x+y+z)*100,2),round(y/(x+y+z)*100,2),round(z/(x+y+z)*100,2))#计算各部分所占比例#
+group=c("advancing","no change","declning")
+p<-c(96,4,20)#设置位置参数#
+p_g<-c(96,4,20)#设置位置参数#
+data=data.frame(group,percent,p,count,p_g)#将处理后的数据合成数据框#
+ggplot(data,aes(' ',percent,fill=group))+
+  geom_bar(stat="identity",position="stack",width = 0.05)+ #stack:堆积柱状图，width:柱状图宽度
+  theme_bw()+
+  #scale_fill_brewer(palette='Set1')+ #柱状图颜色，使用RColorBrewer
+  scale_fill_manual(values=c("#FF6666","#66CC33","#CCCCCC"))+
+  
+  #显示数字
+  geom_text(aes(y=p,label=paste(percent,'%',sep = '')),size=3,col='white')+
+  geom_text(aes(y=p_g,label=group),size=3,col='black',vjust=-1.5)+
+  guides(fill=guide_legend(title="股票年收益率"))+ ##显示标题
+  guides(fill=F)  + #不显示图例
+  #不显示各种图标
+  theme(panel.grid = element_blank(),panel.border = element_blank(),
+        axis.text = element_blank(),axis.ticks = element_blank(),
+        text = element_blank())+
+  coord_flip() #将图形横纵坐标互换
+
+
+
+```{r value}
+install.packages("treemap")
+library(treemap)
+
+data <- read.csv('C://Users//Asus//Desktop//PE_MV.csv');
+
+treemap(
+  data,
+  index=c("nn"),
+  vSize="MV",
+  vColor="PE",
+  type="value"
+)
+######以市值为面积大小，以市盈率为颜色深浅
+
+
+agg <- aggregate(PE~nn+PE, data=data, FUN=sum)
+mPE <- max(agg$PE)
+minPE <- min(agg$PE)
+treemap(
+  data,
+  index=c("nn","PE"),
+  vSize="MV",
+  vColor="PE",
+  type="manual",
+  border.col='#63B8FF',
+  palette=c("#FFFFFF00", "#1C86EE00"),
+  range=c(minPE, mPE)
+) 
+
+
+########2.1 不同行业市盈率为正的上市公司PE\ROE图###############
+
+install.packages("treemapify")
+install.packages("ggplot2")
+install.packages("tweenr")
+install.packages("gganimate")
+install.packages("RColorBrewer")
+
+
+
+library("ggplot2")
+library("treemapify")
+library("tweenr")
+library("gganimate")
+library("RColorBrewer")
+data1<-read.csv('C://Users//Asus//Desktop//gp.csv')
+head(data1,3)
+
+ggplot(data1, aes(area = PE, fill = ROE, label =paste(Lstknm,PE),subgroup =Csrciccd1 )) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_subgroup_text(place = "centre", grow = T, alpha = 0.2, colour ="black", fontface = "italic", min.size =0) +
+  geom_treemap_text(colour = "darkblue", place = "topleft", reflow = T,alpha=1)+
+  facet_wrap( ~ Csrciccd1) +
+  scale_fill_brewer(palette="Blues")+
+  labs(
+    title = "不同行业上市公司PE和ROE",
+    caption = "面积大小代表公司PE，颜色深浅代表ROE",
+    fill = "ROE" )+
+  theme(legend.position = "bottom",
+        plot.caption=element_text(hjust=0))+
+  
+  scale_fill_distiller(palette="Greens")
+
+
+
+
+####################2.2 不同行业上市公司的市值和收益率##################
+install.packages("treemapify")
+install.packages("ggplot2")
+install.packages("tweenr")
+install.packages("gganimate")
+install.packages("RColorBrewer")
+
+
+library("ggplot2")
+library("treemapify")
+library("tweenr")
+library("gganimate")
+library("RColorBrewer")
+data1<-read.csv('C://Users//Asus//Desktop//MV_YY.csv')
+head(data1,3)
+
+ggplot(data1, aes(area = MV, fill = YY, label =paste(Lstknm,YY),subgroup =Csrciccd1 )) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_subgroup_text(place = "centre", grow = T, alpha = 0.5, colour ="black", fontface = "italic", min.size =0) +
+  geom_treemap_text(colour = "white", place = "centre", reflow = T,alpha=1)+
+
+  labs(
+    title = "不同行业上市公司市值和收益率",
+    caption = "面积大小代表公司市值，颜色深浅代表收益率",
+    fill = "YY" )+
+  theme(legend.position = "bottom",
+        plot.caption=element_text(hjust=0))+
+  
+  scale_fill_distiller(palette="Greens")
+
+
+
+
+
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+####################2.3 Bubble chart气泡图##################
+install.packages("readxl")
+install.packages("ggplot2")
+install.packages("RColorBrewer")
+
+library(ggplot2)
+library(readxl)
+library(RColorBrewer)
+
+ex = read_excel("C:\\Users\\lenovo\\Desktop\\data.xls")
+
+p = ggplot(ex,aes(x = ex$`季收益率_Quarterly yield`,y = 市盈率_PE)) ######X轴表示季度收益率（%），y轴表示市盈率P/E ratio
+
+pbu = p + geom_point(aes(size=ex$`市场价值（亿元）_Market Value`,color=ex$证监会行业门类代码_Industry,alpha = 0.8))
+######气泡大小代表公司市值，气泡颜色代表公司所在行业
+
+pbu = pbu + geom_text(aes(label = ex$`最新股票名称_listed company`),vjust = 2.5,size = 2.5) + labs(color="Industry",x="Quarterly yield",y="PE")
+######每个气泡下方标注公司名称
+
+pbu = pbu + scale_size_area(max_size = 10) + guides(alpha = F,size = F) + scale_color_brewer(palette = 'Dark2')
+
+pbu
+
+ggsave("out.jpeg",width=9,height=7)
+
+library(dplyr)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(xts)
+library(quantmod)
+library(data.table)
+library(DBI)
+##########股价走势图
+#从网上抓取苹果公司简称“AAPL”的近俩年股票信息
+getSymbols("AAPL",from = "2018-01-01",to = Sys.Date(),scr="yahoo")
+#用收盘价绘制价格走势图
+plot(AAPL$AAPL.Close,main="苹果公司股价走势图")  
+
+
+#############k线图
+#01上证综指
+#采用默认的ChartSeries绘制K线图
+# 从yahoo下载数据
+SHDX<-getSymbols("000001.ss",from = "2018-01-01",to = Sys.Date(),src = "yahoo",auto.assign=FALSE)
+tail(SHDX,n=7)    
+#查看最近7天的数据
+# 设定参数，白色背景，蜡烛图为红色和绿色，符合中国市场
+# 绘制最近11个月的k线图，添加交易量指标
+chartSeries(last(price, '11 months'),theme='white',up.col='green',dn.col='red',TA="addVo()")
+mytheme<-chartTheme(theme="white",up.col="red",up.border="black",dn.col="green",dn.border="black")
+chartSeries(SHDX,subset="last 11 months",TA=(c(addVo(),addBBands())),theme=mytheme)
+addSMA(5);addSMA(10);addSMA(20);addBBands();addMACD()
+setTA()
+
+###02贵州茅台,无add交易量指标
+setSymbolLookup(GZMT=list(name='600519.ss',src='yahoo'))
+getSymbols("GZMT")
+chartSeries(GZMT,theme="white")
+
+install.packages("quantmod")
+install.packages("animation")
+library(quantmod)
+library(animation)
+
+getSymbols("GS") 
+
+chartSeries(GS) 
+
+
+ani.options(interval = 0.05)
+saveGIF({
+  
+  for(i in 1:20){  
+    candleChart(GS,multi.col=TRUE,theme='white',yrange=c(0,1200));
+    GS = GS+rnorm(3,50)  ; # replace this with something interesting.
+  }
+  
+}, movie.name = "animation.gif", img.name = "Rplot", convert = "convert", 
+cmd.fun = system, clean = TRUE)
+
+##########正负条形图
+library("ggplot2")
+data <- read.csv('C://Users//Asus//Desktop//C000001.csv')
+# 增加辅助列，表示当前记录change值大于/小于0。
+data$pos<-data$change >=0
+head(data)
+# 基函数
+ggplot(data, aes(x = Date, y = change, fill = "pos")) +
+  # 条形图函数：position设置为"identity"是为了避免系统因绘制负值条形而引发的警告
+geom_bar(stat = "identity", position = "identity", colour = "black", size = 0.1) +
+  # 手动调色标尺：大于0为红，小于0为蓝
+  scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
+
+
+
+
